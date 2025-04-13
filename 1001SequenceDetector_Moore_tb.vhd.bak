@@ -1,0 +1,78 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity tb_VHDL_MOORE_FSM_Sequence_Detector is
+end tb_VHDL_MOORE_FSM_Sequence_Detector;
+
+architecture behavior of tb_VHDL_MOORE_FSM_Sequence_Detector is
+
+    component VHDL_MOORE_FSM_Sequence_Detector
+        Port (
+            clock : in STD_LOGIC;
+            reset : in STD_LOGIC;
+            sequence_in : in STD_LOGIC;
+            detector_out : out STD_LOGIC
+        );
+    end component;
+
+    signal clock : STD_LOGIC := '0';
+    signal reset : STD_LOGIC := '0';
+    signal sequence_in : STD_LOGIC := '0';
+    signal detector_out : STD_LOGIC;
+
+    constant clock_period : time := 10 ns;
+
+begin
+
+    uut: VHDL_MOORE_FSM_Sequence_Detector
+        port map (
+            clock => clock,
+            reset => reset,
+            sequence_in => sequence_in,
+            detector_out => detector_out
+        );
+
+    -- Clock generation
+    clock_process : process
+    begin
+        while true loop
+            clock <= '0';
+            wait for clock_period / 2;
+            clock <= '1';
+            wait for clock_period / 2;
+        end loop;
+    end process;
+
+    -- Stimulus process
+    stim_proc: process
+    begin
+        -- Reset
+        reset <= '1';
+        wait for 20 ns;
+        reset <= '0';
+
+        -- Provide long sequence to test output
+        -- Sequence: 1 0 0 1 -> should detect
+        sequence_in <= '1'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '1'; wait for clock_period;
+
+        -- Some more random inputs
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '1'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '1'; wait for clock_period;
+
+        -- Another match
+        sequence_in <= '1'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '0'; wait for clock_period;
+        sequence_in <= '1'; wait for clock_period;
+
+        -- Finish
+        wait;
+    end process;
+
+end behavior;
